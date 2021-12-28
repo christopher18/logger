@@ -58,6 +58,13 @@ const (
 	LstdFlags     = Ldate | Ltime // initial values for the standard logger
 )
 
+// Logger type enums
+const (
+	InfoType    = "info"
+	WarningType = "warning"
+	ErrorType   = "error"
+)
+
 // A Logger represents an active logging object that generates lines of
 // output to an io.Writer. Each logging operation makes a single call to
 // the Writer's Write method. A Logger can be used simultaneously from
@@ -76,6 +83,28 @@ type Logger struct {
 // after the log header if the Lmsgprefix flag is provided.
 // The flag argument defines the logging properties.
 func New(out io.Writer, prefix string, flag int) *Logger {
+	return &Logger{out: out, prefix: prefix, flag: flag}
+}
+
+// New creates a new Logger with presets depending on type.
+// The ltype argument specifies which presets to use. It
+// can be 'info', 'warning', or 'error'.
+// The out variable sets the destination to which log
+// data will be written. The flag argument defines the
+// logging properties.
+func NewFromPreset(ltype string, out io.Writer) *Logger {
+	prefix := ""
+	flag := Ldate | Ltime | Lmicroseconds | Lshortfile
+	switch ltype {
+	case InfoType:
+		prefix = "\033[0;32m" + fmt.Sprintf("%-9v", "INFO:") + "\033[0m"
+	case WarningType:
+		prefix = "\033[0;33m" + fmt.Sprintf("%-9v", "WARNING:") + "\033[0m"
+	case ErrorType:
+		prefix = "\033[0;31m" + fmt.Sprintf("%-9v", "ERROR:") + "\033[0m"
+	default:
+		prefix = "\033[0;32m" + fmt.Sprintf("%-9v", "INFO:") + "\033[0m"
+	}
 	return &Logger{out: out, prefix: prefix, flag: flag}
 }
 
